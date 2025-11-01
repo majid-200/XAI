@@ -73,11 +73,71 @@ This notebook shifts focus to interpreting "black-box" models—those whose inte
         - Highlighted the critical weakness of PDPs (the feature independence assumption) and demonstrated why **ALE plots are a more robust alternative**.
         - Used **2D ALE plots** to visualize and understand complex **feature interactions** (e.g., how the effect of `year` on price changes with a car's `odometer` reading).
 
+### 05 - Local Model-Agnostic Interpretation Methods
+This notebook provides a head-to-head comparison of two of the most popular local, model-agnostic interpretation methods: **SHAP** and **LIME**. The mission is to explain paradoxical sales outcomes for a high-end chocolate manufacturer.
+
+- **Goal:** Explain *why* a "Disappointing" rated chocolate bar has high sales and an "Outstanding" one has low sales.
+- **Models:** A Support Vector Machine (SVM) for tabular data and a LightGBM model for NLP (text) data.
+- **Work Done & Interpretation Techniques:**
+    - **Multi-Modal Data Handling:** Performed extensive feature engineering on both tabular (e.g., bean origin, cocoa percent) and text data (e.g., descriptive taste words). The text data was vectorized using `TfidfVectorizer`.
+    - **SHAP's KernelExplainer:**
+        - Applied to the SVM to generate local explanations for specific chocolate bars.
+        - Used **Decision Plots** to visualize how multiple features collectively push a prediction away from the baseline.
+        - Used **Force Plots** for an intuitive, additive view of a single prediction's drivers.
+    - **LIME (Local Interpretable Model-agnostic Explanations):**
+        - `LimeTabularExplainer`: Used to explain the SVM's predictions, highlighting a discrepancy with SHAP's global view and demonstrating the "local" nature of LIME's explanations.
+        - `LimeTextExplainer`: Applied to the LightGBM model to explain predictions based on taste descriptions, showing which words contributed positively or negatively.
+    - **SHAP for NLP:** Demonstrated how to adapt `KernelExplainer` for text data, providing a global summary of word importance with a beeswarm plot.
+
+### 06 - Anchors and Counterfactual Explanations
+This notebook tackles the critical and high-stakes issue of **model fairness**. It uses a dataset related to the COMPAS tool (a criminal risk assessment algorithm) to investigate potential racial bias. Since the original COMPAS model is a black box, a proxy model is trained to replicate its predictions.
+
+- **Goal:** Use local explanations to audit a proxy model for fairness and understand its decision boundaries.
+- **Model:** A `CatBoostClassifier` serves as a proxy for the proprietary COMPAS model.
+- **Work Done & Interpretation Techniques:**
+    - **Bias Analysis:** Started by creating and comparing **confusion matrices** for different racial groups, quantifying the disparity in False Positive Rates (FPR).
+    - **Anchor Explanations (Alibi):**
+        - Generated **Anchors**, which are simple, high-precision IF-THEN rules that "lock in" a prediction.
+        - This answers the question: *"What are the minimal conditions sufficient for the model to make this prediction?"*
+        - Showed how anchors for a "High Risk" prediction differ significantly between an African-American and a Caucasian defendant, exposing the model's differing logic.
+    - **Counterfactual Explanations (DiCE & Alibi):**
+        - Generated **Counterfactuals**, which find the smallest changes needed to flip a model's prediction from one outcome to another.
+        - This answers the question: *"What would need to be different for this person to get a 'Low Risk' score?"*
+        - Implemented counterfactuals using the **DiCE (Diverse Counterfactual Explanations)** library, showcasing actionable insights into how the model could be "persuaded."
+
+### 07 - Visualizing Convolutional Neural Networks for Model Debugging
+This notebook dives deep into the world of **Computer Vision**, using a wide array of visual attribution methods to debug a Convolutional Neural Network (CNN). The scenario involves a "smart recycling" system where a model performs well on validation data but fails in a real-world test.
+
+- **Goal:** Diagnose *why* a high-performing CNN fails to generalize by visualizing what it "sees".
+- **Model:** A pre-trained `EfficientNet-b4` model, fine-tuned for garbage classification, implemented in PyTorch.
+- **Work Done & Interpretation Techniques:**
+    - **Activation-Based:**
+        - **Intermediate Activations:** Visualized the feature maps from early and deep convolutional layers to understand the hierarchy of learned features, from simple textures to complex shapes.
+    - **Gradient-Based:**
+        - **Saliency Maps:** A foundational method showing which pixels the model is most sensitive to.
+        - **Guided Grad-CAM:** Combined class-discriminative localization (where is the object?) with high-resolution detail (what specific textures/edges mattered?) to create detailed heatmaps.
+        - **Integrated Gradients (IG):** A theoretically-grounded method that attributes the prediction by averaging gradients along a path from a baseline image. `SmoothGrad` was used to reduce noise.
+    - **Backpropagation-Based:**
+        - **DeepLIFT:** An alternative to IG that backpropagates "difference-from-reference" signals, providing stable and complete attributions.
+    - **Perturbation-Based:**
+        - **Feature Ablation & Occlusion Sensitivity:** Systematically removed (occluded) parts of the image to measure the drop in prediction confidence, identifying critical regions.
+        - **Shapley Value Sampling & KernelSHAP:** Applied game-theory principles to fairly distribute the "credit" for a prediction among different image regions, capturing feature interactions.
+
+## Key Concepts Covered
+- **Global vs. Local Interpretation:** Understanding the model as a whole versus explaining a single prediction.
+- **Model-Specific vs. Model-Agnostic Methods:** Using techniques tied to a specific model architecture versus universal methods that work on any model.
+- **Model Fairness & Bias Auditing:** Using XAI to identify and understand predictive disparities between different demographic groups.
+- **Interpreting Deep Learning Models:** Applying a suite of visual attribution methods specifically designed for CNNs.
+- **Anchors & Counterfactuals:** Two powerful, perturbation-based methods for generating human-readable local explanations.
+- **Comparing XAI Methods:** Critically analyzing the strengths and weaknesses of a wide array of interpretation techniques.
+
 ## Technologies Used
 - **Core Libraries:** Python 3, Pandas, NumPy, Scikit-learn
-- **Modeling:** Statsmodels, CatBoost
-- **Visualization:** Matplotlib, Seaborn
-- **Interpretability Libraries:** SHAP, PDPbox, PyALE
+- **Deep Learning:** PyTorch, PyTorch Lightning, torchvision
+- **Modeling:** Statsmodels, CatBoost, LightGBM, SVM, EfficientNet
+- **NLP:** NLTK, `TfidfVectorizer`
+- **Visualization:** Matplotlib, Seaborn, OpenCV
+- **Interpretability Libraries:** SHAP, LIME, PDPbox, PyALE, Alibi, DiCE, Captum
 
 ## How to Use This Repository
 1.  **Clone the repository:**
@@ -86,7 +146,7 @@ This notebook shifts focus to interpreting "black-box" models—those whose inte
     ```
 2.  **Install dependencies:** It is recommended to create a virtual environment. The required libraries are listed at the top of each notebook. You can install them using pip:
     ```bash
-    pip install pandas scikit-learn matplotlib statsmodels catboost shap pdpbox PyALE
+    pip install pandas scikit-learn matplotlib statsmodels catboost lightgbm tensorflow nltk torch torchvision pytorch-lightning efficientnet-pytorch torchinfo opencv-python tqdm captum shap lime pdpbox PyALE alibi dice-ml
     ```
 3.  **Run the notebooks:** Launch Jupyter Lab or Jupyter Notebook and open the `.ipynb` files to explore the code and analysis.
     ```bash
