@@ -142,7 +142,7 @@ This notebook dives deep into the world of **Computer Vision**, using a wide arr
 ## How to Use This Repository
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/majid-200/XAI.git
+    git clone https://github.com/majid-200/Interpretable-ML-with-Python.git
     ```
 2.  **Install dependencies:** It is recommended to create a virtual environment. The required libraries are listed at the top of each notebook. You can install them using pip:
     ```bash
